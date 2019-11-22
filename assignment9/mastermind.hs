@@ -70,9 +70,9 @@ play code times = do if times == 0 then
                               putStrLn "Congrats!"
                           else do correct <- return (countCorrect code (words(guess)))
                                   putStrLn "Wrong ----- "
-                                  putStr "Hint: the number of correct colors in the right positions:"
-                                  print correct
-                                  putStr "The number of mismatch positions: "
+                                  putStr "Hint: the number of correct colors in the right positions: "
+                                  putStr (show correct)
+                                  putStr " - Mismatch positions: "
                                   print (length code - correct)
                                   play code (times - 1) 
 
@@ -92,7 +92,7 @@ mastermind = do manual
                 x <- getNumber "Please enter the desired code length: " 
                 y <- getNumber "Please enter the number of colors: "
                 z <- getNumber "Please enter the number of tries: "
-                putStrLn "Please remember that if you enter a longer input than the code length, it will fail!"
+                putStrLn "Please remember that if you enter a longer/shorter input than the code length, it will fail!"
                 source <- makeSource y
                 code <- createCode x y source
                 print code
@@ -108,5 +108,5 @@ manual = do putStrLn "Welcome to the mastermind game."
             putStrLn "5.|yellow| - 6.|mint| - 7.|pink|"
             putStrLn "8.|orange| - 9.|violet| \n"
             putStrLn "For example: if the number of colors is 4, then the code will be consisted of (red, blue, green, white)"
-            putStrLn "- Example input: \"red blue blue white\" "
-            putStrLn "If you choose more than 9 colors, then you have to input your own colors."
+            putStrLn "- Example input: \"red blue blue white\" (separated by spaces) "
+            putStrLn "If you choose more than 9 colors, then you have to input your own colors. \n"
