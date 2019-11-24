@@ -14,14 +14,13 @@ dice x = getStdRandom (randomR (0,x-1))
 --             b <- dice
 --             return (a + b)
 
--- New IO functions
-
-isNumber' :: String -> Bool
+-- Input-related functions
+isNumber' :: String -> Bool -- to check if a String is a number
 isNumber' [] = True
 isNumber' (x:xs) | isDigit x = isNumber' xs
                  | otherwise = False
 
-getNumber :: String -> IO Int
+getNumber :: String -> IO Int -- get input as a number
 getNumber s = do putStr s
                  x <- getLine
                  if (isNumber' x) then
@@ -30,40 +29,48 @@ getNumber s = do putStr s
                     do putStrLn "Error, not a number"
                        getNumber s
 
-getColor :: Int -> IO String
+getColor :: Int -> IO String --get color input
 getColor n = do putStr "Color "
                 putStr (show n)
                 x <- getLine
                 return x
 
--- Code
-type Code = [String]
-type Source = [String]
+getSource :: Int -> Int -> IO Source --Ask the user to input the colors
+getSource len num = do if len == 0 then return []
+                       else do x <- getColor num
+                               xs <- getSource (len-1) (num+1)
+                               return (x:xs)
+
+-- Data
+type Code = [String] -- code to crack
+type Source = [String] -- colors
 
 -- game mechanics
-createCode :: Int -> Int -> Source -> IO Code
+createCode :: Int -> Int -> Source -> IO Code --create a random code with the given source
 createCode len col source = do if len == 0 then return []
                                else do value <- dice col
                                        x <- return(source !! value)
                                        xs <- createCode (len - 1) col source
                                        return (x:xs)
 
-isEqual :: Code -> [String] -> Bool
+isEqual :: Code -> [String] -> Bool --check if the answer input is correct or not
 isEqual [] [] = True
 isEqual s [] = False
 isEqual (x:xs) (y:ys) | x == y = isEqual xs ys
                       | otherwise = False
                   
-countCorrect :: Code -> [String] -> Int
+countCorrect :: Code -> [String] -> Int --count the positions with the correct color
 countCorrect _ [] = 0
 countCorrect (x:xs) (y:ys) | x == y = (1 + countCorrect xs ys)
                            | otherwise = countCorrect xs ys
 
 -- play ground
-play :: Code -> Int -> IO()
+play :: Code -> Int -> IO() --game mechanics implementation
 play code times = do if times == 0 then
-                        putStrLn "you failed!"
-                     else 
+                        do putStrLn "you failed!"
+                           putStrLn "The answer is: "
+                           print code
+                     else
                        do putStr "Guess? : "
                           guess <- getLine
                           if (isEqual code (words(guess))) then
@@ -77,17 +84,11 @@ play code times = do if times == 0 then
                                   play code (times - 1) 
 
 --Starting the game
-getSource :: Int -> Int -> IO Source
-getSource len num = do if len == 0 then return []
-                       else do x <- getColor num
-                               xs <- getSource (len-1) (num+1)
-                               return (x:xs)
-
 makeSource :: Int -> IO Source
 makeSource y = do if (y > 9) then getSource y 1
                   else return ["red","blue","green","white","yellow","mint","pink","orange","violet"]
 
-mastermind :: IO()
+mastermind :: IO() --main function, use this to start the game
 mastermind = do manual
                 x <- getNumber "Please enter the desired code length: " 
                 y <- getNumber "Please enter the number of colors: "
@@ -95,7 +96,7 @@ mastermind = do manual
                 putStrLn "Please remember that if you enter a longer/shorter input than the code length, it will fail!"
                 source <- makeSource y
                 code <- createCode x y source
-                print code
+                --print code --testing the game
                 putChar '\n' 
                 play code z
 
